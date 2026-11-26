@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>駅ランダム</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f2f3f5;
+            color: #222222;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* --- ① ヘッダーデザイン --- */
+        .app-header {
+            height: 96px;
+            background-color: #3C3F67;
+            position: relative;
+            box-sizing: border-box;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header-title {
+            font-family: Impact, "Arial Black", "MS PGothic", sans-serif;
+            color: #FFFFFF;
+            font-size: 2.2rem;
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            margin: 0;
+            letter-spacing: 2px;
+        }
+
+        .header-stripe-blue {
+            position: absolute;
+            bottom: 14px;
+            height: 7px;
+            width: 100%;
+            background-color: #3090B4;
+        }
+
+        .header-stripe-white {
+            position: absolute;
+            bottom: 8px;
+            height: 6px;
+            width: 100%;
+            background-color: #FFFFFF;
+        }
+
+        .main-container {
+            max-width: 920px;
+            margin: 25px auto;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+
+        /* --- ② 板チョコ風電卓レイアウト (左右50%ずつ占有) --- */
+        .calc-wrapper {
+            display: flex;
+            margin-bottom: 30px;
+            border: 2px solid #2d304f;
+            background-color: #2d304f;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        /* 左半分 (会社ボタン: 左右均等50%占有) */
+        .calc-left {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1px;
+            background-color: #2d304f;
+        }
+
+        .calc-left .btn-span-3 {
+            grid-column: span 3;
+            padding: 14px 2px;
+            font-size: 0.88rem;
+        }
+
+        .calc-left .btn-span-4 {
+            grid-column: span 4;
+            padding: 14px 2px;
+            font-size: 0.88rem;
+        }
+
+        /* 右半分 (カスタムボタン: 左右均等50%占有) */
+        .calc-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            background-color: #2d304f;
+            border-left: 1px solid #2d304f;
+        }
+
+        .calc-right .calc-btn {
+            flex: 1;
+            font-size: 1.05rem;
+        }
+
+        /* 共通ボタン */
+        .calc-btn {
+            border: none;
+            border-radius: 0;
+            padding: 16px 4px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #222;
+            background-color: #e2e6ea;
+            box-shadow: inset 1px 1px 0px rgba(255,255,255,0.8), inset -1px -1px 0px rgba(0,0,0,0.1);
+            cursor: pointer;
+            text-align: center;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.15s, filter 0.15s;
+        }
+
+        .calc-btn:hover {
+            filter: brightness(0.96);
+        }
+
+        .calc-btn:active {
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.25);
+        }
+
+        .btn-comp.active-company {
+            background-color: #D1DA75 !important;
+            color: #111;
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.25) !important;
+            font-weight: 900;
+        }
+
+        .btn-mode-custom.active-custom {
+            background-color: #5B4067 !important;
+            color: #FFFFFF;
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.4) !important;
+            font-weight: 900;
+        }
+
+        .btn-custom-setting {
+            background-color: #F45A47 !important;
+            color: #FFFFFF;
+        }
+
+        /* --- 実行エリア --- */
+        .exec-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 10px 0;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            flex-wrap: wrap;
+        }
+
+        .exec-input-group {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #111;
+            font-family: Impact, "Arial Black", sans-serif;
+        }
+
+        .exec-input-group input[type="number"] {
+            width: 75px;
+            height: 48px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid #2d304f;
+            border-radius: 0;
+            margin-right: 10px;
+            background-color: #ffffff;
+            box-sizing: border-box;
+        }
+
+        .exec-input-group input[type="number"]:focus {
+            outline: none;
+            border-color: #FF4051;
+            background-color: #fff;
+        }
+
+        .btn-exec {
+            background-color: #FF4051;
+            color: #ffffff;
+            border: 2px solid #cc2938;
+            padding: 10px 45px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 0;
+            cursor: pointer;
+            font-family: Impact, "Arial Black", sans-serif;
+            letter-spacing: 1px;
+            box-shadow: 3px 3px 0px #2d304f;
+            transition: transform 0.05s, box-shadow 0.05s;
+        }
+
+        .btn-exec:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #2d304f;
+        }
+
+        /* --- 結果表示（駅名最大10文字固定 ＆ 上下2層構造） --- */
+        .file-load-box {
+            font-size: 0.85rem;
+            color: #555;
+            margin-top: 25px;
+            padding: 12px 15px;
+            background-color: #e6e8ec;
+            border: 1px solid #ccc;
+            border-radius: 0;
+        }
+
+        .results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+        }
+
+        .station-row-card {
+            display: flex;
+            align-items: center;
+            background-color: #ffffff;
+            border: 2px solid #2d304f;
+            padding: 12px 18px;
+            box-sizing: border-box;
+            gap: 18px;
+            border-radius: 0;
+            box-shadow: 3px 3px 0px rgba(45, 48, 79, 0.15);
+            width: max-content;
+            min-width: 100%;
+        }
+
+        .col-icon {
+            width: 84px;
+            height: 84px;
+            display: grid;
+            place-items: center;
+            place-content: center;
+            gap: 2px;
+            background-color: transparent;
+            border: none;
+            padding: 0;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            border-radius: 0;
+        }
+
+        .col-icon[data-count="1"] { grid-template-columns: 1fr; gap: 0; }
+        .col-icon[data-count="2"] { grid-template-columns: repeat(2, 1fr); }
+        .col-icon[data-count="3"] { grid-template-columns: repeat(3, 1fr); }
+        .col-icon[data-count="4"] { grid-template-columns: repeat(2, 1fr); }
+        .col-icon[data-count="5"],
+        .col-icon[data-count="6"] { grid-template-columns: repeat(3, 1fr); }
+        .col-icon[data-count="7"],
+        .col-icon[data-count="8"],
+        .col-icon[data-count="9"] { grid-template-columns: repeat(3, 1fr); }
+        .col-icon[data-count="10"],
+        .col-icon[data-count="11"],
+        .col-icon[data-count="12"] { grid-template-columns: repeat(4, 1fr); gap: 1.5px; }
+
+        /* --- オリジナルCSSナンバリングバッジ（外皿なし・純銀メタル枠＆カラー全面＋袋文字オーバーレイ） --- */
+        .num-badge {
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 1 / 1;
+            background-color: transparent;
+            border: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-sizing: border-box;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            user-select: none;
+            position: relative;
+        }
+
+        /* バッジ全体を囲む純銀メタルフレーム */
+        .num-badge-silver {
+            width: 100%;
+            height: 100%;
+            padding: 3px;
+            box-sizing: border-box;
+            background: linear-gradient(135deg, 
+                #ffffff 0%, 
+                #e5e7eb 20%, 
+                #9ca3af 45%, 
+                #f3f4f6 55%,
+                #d1d5db 80%,
+                #ffffff 100%
+            );
+            box-shadow: 
+                inset 0 1px 1px rgba(255, 255, 255, 1),
+                inset 0 -1px 1px rgba(156, 163, 175, 0.6);
+            border: 1px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 銀枠の内側いっぱいに広がるカラーパレット面 */
+        .num-badge-color {
+            width: 100%;
+            height: 100%;
+            border: 0.5px solid rgba(255, 255, 255, 0.65);
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* カラー面の上に直接乗せる極太黒縁・白抜き袋文字 */
+        .num-badge-text {
+            color: #ffffff;
+            font-family: 'Oswald', 'Impact', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            line-height: 1;
+            white-space: nowrap;
+            paint-order: stroke fill;
+            -webkit-text-stroke: 4px #000000;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            z-index: 2;
+        }
+
+        /* 個数に応じたサイズ・銀枠幅（縁の太さ）・文字サイズの自動スケーリング */
+        /* 1個時は外皿と同じ84pxフルサイズで表示 */
+        .col-icon[data-count="1"] .num-badge { width: 84px; height: 84px; max-width: 84px; max-height: 84px; }
+        .col-icon[data-count="1"] .num-badge-silver { padding: 5px; border-width: 1px; }
+        .col-icon[data-count="1"] .num-badge-color { border-width: 1px; }
+        .col-icon[data-count="1"] .num-badge-text { font-size: 27px; -webkit-text-stroke: 6px #000000; }
+
+        /* 2個時 (約41px) */
+        .col-icon[data-count="2"] .num-badge { max-width: 41px; max-height: 41px; }
+        .col-icon[data-count="2"] .num-badge-silver { padding: 2px; border-width: 0.5px; }
+        .col-icon[data-count="2"] .num-badge-color { border-width: 0.5px; }
+        .col-icon[data-count="2"] .num-badge-text { font-size: 13px; -webkit-text-stroke: 3.2px #000000; }
+
+        /* 3個時 (約26.5px) */
+        .col-icon[data-count="3"] .num-badge { max-width: 26.5px; max-height: 26.5px; }
+        .col-icon[data-count="3"] .num-badge-silver { padding: 1.5px; border-width: 0.5px; }
+        .col-icon[data-count="3"] .num-badge-color { border: none; }
+        .col-icon[data-count="3"] .num-badge-text { font-size: 8.8px; -webkit-text-stroke: 2.3px #000000; letter-spacing: 0; }
+
+        /* 4個時 (約41px) */
+        .col-icon[data-count="4"] .num-badge { max-width: 41px; max-height: 41px; }
+        .col-icon[data-count="4"] .num-badge-silver { padding: 2px; border-width: 0.5px; }
+        .col-icon[data-count="4"] .num-badge-color { border-width: 0.5px; }
+        .col-icon[data-count="4"] .num-badge-text { font-size: 13px; -webkit-text-stroke: 3.2px #000000; }
+
+        /* 5〜6個時 (約26.5px) */
+        .col-icon[data-count="5"] .num-badge,
+        .col-icon[data-count="6"] .num-badge { max-width: 26.5px; max-height: 26.5px; }
+        .col-icon[data-count="5"] .num-badge-silver,
+        .col-icon[data-count="6"] .num-badge-silver { padding: 1.5px; border-width: 0.5px; }
+        .col-icon[data-count="5"] .num-badge-color,
+        .col-icon[data-count="6"] .num-badge-color { border: none; }
+        .col-icon[data-count="5"] .num-badge-text,
+        .col-icon[data-count="6"] .num-badge-text { font-size: 8.8px; -webkit-text-stroke: 2.3px #000000; letter-spacing: 0; }
+
+        /* 7〜9個時 (約26.5px) */
+        .col-icon[data-count="7"] .num-badge,
+        .col-icon[data-count="8"] .num-badge,
+        .col-icon[data-count="9"] .num-badge { max-width: 26.5px; max-height: 26.5px; }
+        .col-icon[data-count="7"] .num-badge-silver,
+        .col-icon[data-count="8"] .num-badge-silver,
+        .col-icon[data-count="9"] .num-badge-silver { padding: 1.5px; border-width: 0.5px; }
+        .col-icon[data-count="7"] .num-badge-color,
+        .col-icon[data-count="8"] .num-badge-color,
+        .col-icon[data-count="9"] .num-badge-color { border: none; }
+        .col-icon[data-count="7"] .num-badge-text,
+        .col-icon[data-count="8"] .num-badge-text,
+        .col-icon[data-count="9"] .num-badge-text { font-size: 8.8px; -webkit-text-stroke: 2.3px #000000; letter-spacing: 0; }
+
+        /* 10〜12個時 (約19.8px) */
+        .col-icon[data-count="10"] .num-badge,
+        .col-icon[data-count="11"] .num-badge,
+        .col-icon[data-count="12"] .num-badge { max-width: 19.8px; max-height: 19.8px; }
+        .col-icon[data-count="10"] .num-badge-silver,
+        .col-icon[data-count="11"] .num-badge-silver,
+        .col-icon[data-count="12"] .num-badge-silver { padding: 1px; border: none; }
+        .col-icon[data-count="10"] .num-badge-color,
+        .col-icon[data-count="11"] .num-badge-color,
+        .col-icon[data-count="12"] .num-badge-color { border: none; }
+        .col-icon[data-count="10"] .num-badge-text,
+        .col-icon[data-count="11"] .num-badge-text,
+        .col-icon[data-count="12"] .num-badge-text { font-size: 6.5px; -webkit-text-stroke: 1.8px #000000; letter-spacing: 0; }
+
+        /* 駅名欄：最大10文字固定スペース */
+        .col-station-name {
+            font-size: 1.25rem;
+            font-weight: bold;
+            width: 10em;
+            min-width: 10em;
+            max-width: 10em;
+            color: #111;
+            word-break: break-all;
+            flex-shrink: 0;
+            line-height: 1.3;
+        }
+
+        /* 右側エリア：上下2層構造コンテナ */
+        .col-info-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-grow: 1;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        /* 上層：会社名（グレー背景カード風） */
+        .col-company-box {
+            background-color: #e2e6ea;
+            border: 1px solid #c0c4cc;
+            padding: 4px 10px;
+            font-size: 0.88rem;
+            font-weight: bold;
+            color: #222;
+            display: inline-block;
+            align-self: flex-start;
+            border-radius: 0;
+            line-height: 1.3;
+            white-space: nowrap;
+        }
+
+        /* 下層：路線名 */
+        .col-routes-box {
+            font-size: 0.95rem;
+            color: #333;
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+
+        .notice-note {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #555555;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .status-msg {
+            font-size: 0.9rem;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-msg.error {
+            color: #dc3545;
+        }
+
+        /* カスタム画面用スタイル */
+        .custom-view-wrapper {
+            background-color: #ffffff;
+            border: 2px solid #2d304f;
+            padding: 20px;
+            border-radius: 0;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+        }
+
+        .custom-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #2d304f;
+            padding-bottom: 8px;
+        }
+
+        .custom-header h2 {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+
+        .btn-back {
+            padding: 8px 16px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            background-color: #6c757d;
+            color: #ffffff;
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            box-shadow: 2px 2px 0 #3a3f44;
+        }
+
+        .btn-back:active {
+            transform: translate(1px, 1px);
+            box-shadow: none;
+        }
+
+        .custom-top-bar {
+            background-color: #e9ecef;
+            padding: 10px 15px;
+            border-radius: 0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .custom-tree-container {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ced4da;
+            border-radius: 0;
+            background-color: #ffffff;
+            overflow: hidden;
+        }
+
+        .custom-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+            box-sizing: border-box;
+        }
+
+        .custom-row:last-child {
+            border-bottom: none;
+        }
+
+        .custom-row.company-row {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .custom-row.route-row {
+            background-color: #ffffff;
+            font-size: 0.9rem;
+        }
+
+        .custom-row.station-row {
+            background-color: #fafafa;
+            font-size: 0.88rem;
+        }
+
+        .custom-title {
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-toggle-group {
+            display: inline-flex;
+            border: 1px solid #2d304f;
+            border-radius: 0;
+            overflow: hidden;
+            background-color: #fff;
+        }
+
+        .btn-toggle-group .btn-toggle {
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            border: none;
+            border-right: 1px solid #ccc;
+            background-color: #f8f9fa;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            user-select: none;
+            border-radius: 0;
+        }
+
+        .btn-toggle-group .btn-toggle:last-child {
+            border-right: none;
+        }
+
+        .btn-toggle-group .btn-toggle:hover {
+            background-color: #e2e6ea;
+        }
+
+        /* ① 指定の配色に変更 */
+        .btn-toggle-group .btn-toggle.active-on {
+            background-color: #FF4051;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .btn-toggle-group .btn-toggle.active-off {
+            background-color: #474171;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .btn-toggle-group .btn-toggle.active-detail {
+            background-color: #01C2B5;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        @media (max-width: 650px) {
+            .calc-wrapper {
+                flex-direction: column;
+            }
+            .calc-right {
+                flex-direction: row;
+                border-left: none;
+                border-top: 1px solid #2d304f;
+            }
+            .calc-right .calc-btn {
+                padding: 14px 4px;
+            }
+            .station-row-card {
+                flex-wrap: nowrap;
+                gap: 12px;
+                padding: 10px 14px;
+            }
+            .col-station-name {
+                width: auto;
+                min-width: 0;
+                max-width: none;
+                white-space: nowrap;
+            }
+            .custom-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .btn-toggle-group {
+                width: 100%;
+            }
+            .btn-toggle-group .btn-toggle {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header class="app-header">
+    <h1 class="header-title">駅ランダム</h1>
+    <div class="header-stripe-blue"></div>
+    <div class="header-stripe-white"></div>
+</header>
+
+<div class="main-container">
+    
+    <div id="mainView">
+        <!-- 板チョコ風電卓レイアウト -->
+        <div class="calc-wrapper">
+            <!-- 左半分 (会社ボタン) -->
+            <div class="calc-left">
+                <!-- 1段目 -->
+                <button class="calc-btn btn-comp btn-span-3" data-comp="京王電鉄" onclick="selectModeAndCompany('company', '京王電鉄')">京王</button>
+                <button class="calc-btn btn-comp btn-span-3" data-comp="小田急電鉄" onclick="selectModeAndCompany('company', '小田急電鉄')">小田急</button>
+                <button class="calc-btn btn-comp btn-span-3" data-comp="東急電鉄" onclick="selectModeAndCompany('company', '東急電鉄')">東急</button>
+                <button class="calc-btn btn-comp btn-span-3" data-comp="相模鉄道" onclick="selectModeAndCompany('company', '相模鉄道')">相鉄</button>
+                <!-- 2段目 -->
+                <button class="calc-btn btn-comp btn-span-3" data-comp="京急電鉄" onclick="selectModeAndCompany('company', '京急電鉄')">京急</button>
+                <button class="calc-btn btn-comp btn-span-3" data-comp="京成電鉄" onclick="selectModeAndCompany('company', '京成電鉄')">京成</button>
+                <button class="calc-btn btn-comp btn-span-3" data-comp="東武鉄道" onclick="selectModeAndCompany('company', '東武鉄道')">東武</button>
+                <button class="calc-btn btn-comp btn-span-3" data-comp="西武鉄道" onclick="selectModeAndCompany('company', '西武鉄道')">西武</button>
+                <!-- 3段目 -->
+                <button class="calc-btn btn-comp btn-span-4" data-comp="JR東日本" onclick="selectModeAndCompany('company', 'JR東日本')">JR東日本</button>
+                <button class="calc-btn btn-comp btn-span-4" data-comp="東京メトロ" onclick="selectModeAndCompany('company', '東京メトロ')">東京メトロ</button>
+                <button class="calc-btn btn-comp btn-span-4" data-comp="都営交通" onclick="selectModeAndCompany('company', '都営交通')">都営</button>
+            </div>
+            
+            <!-- 右半分 (カスタムボタン) -->
+            <div class="calc-right">
+                <button id="btnCustomMode" class="calc-btn btn-mode-custom" onclick="selectModeAndCompany('custom', null)">カスタムモード</button>
+                <button class="calc-btn btn-custom-setting" onclick="showCustomView()">カスタム設定</button>
+            </div>
+        </div>
+
+        <!-- ③ 注意書き -->
+        <div class="notice-note">*JR東日本は休日おでかけパス範囲で設定</div>
+
+        <!-- 実行エリア -->
+        <div class="exec-area">
+            <div class="exec-input-group">
+                <input type="number" id="pickCount" value="1" min="1" max="100">
+                <span>駅！</span>
+            </div>
+            <button class="btn-exec" onclick="executeRandom()">ランダム</button>
+        </div>
+
+        <div id="resultsList" class="results-list"></div>
+
+        <!-- ② 手動ファイル選択部を削除し、ステータスメッセージのみ残す -->
+        <div class="file-load-box">
+            <div id="statusMessage" class="status-msg"></div>
+        </div>
+    </div>
+
+    <!-- カスタムビュー -->
+    <div id="customView" class="custom-view-wrapper" style="display: none;">
+        <div class="custom-header">
+            <h2>⚙️ カスタマイズ設定</h2>
+            <button class="btn-back" onclick="showMainView()">← メイン画面に戻る</button>
+        </div>
+
+        <div class="custom-top-bar">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button id="customNavBackBtn" class="btn-back" style="display:none; padding:4px 10px; font-size:0.85rem;" onclick="goBackCustomLevel()">← 戻る</button>
+                <div id="customBreadcrumb" style="font-weight: bold; font-size: 0.95rem; color: #333;">🏢 会社一覧</div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 0.85rem; font-weight:bold;">全体一括:</span>
+                <div class="btn-toggle-group">
+                    <button id="globalBtnOn" class="btn-toggle" onclick="setAllGlobal(true)">全てオン</button>
+                    <button id="globalBtnOff" class="btn-toggle" onclick="setAllGlobal(false)">全てオフ</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="customCompanyTree" class="custom-tree-container"></div>
+    </div>
+
+</div>
+
+<script>
+    const ORDER_FILE_NAME = 'ナンバリング順番.txt';
+    const TRANSFER_FILE_NAME = '首都圏大手他社間乗換駅ファイル.txt';
+
+    const DEFAULT_FILES = [
+        ORDER_FILE_NAME,
+        TRANSFER_FILE_NAME,
+        'JR東日本全駅ファイル.txt',
+        'JR東日本(休日おでかけパス)全駅ファイル.txt',
+        '京成電鉄全駅ファイル.txt',
+        '京成全駅ファイル.txt',
+        '京急電鉄全駅ファイル.txt',
+        '京急全駅ファイル.txt',
+        '西武鉄道全駅ファイル.txt',
+        '西武全駅ファイル.txt',
+        '東武鉄道全駅ファイル.txt',
+        '東武全駅ファイル.txt',
+        '京王電鉄全駅ファイル.txt',
+        '京王全駅ファイル.txt',
+        '東急電鉄全駅ファイル.txt',
+        '東急全駅ファイル.txt',
+        '小田急電鉄全駅ファイル.txt',
+        '小田急全駅ファイル.txt',
+        '東京メトロ全駅ファイル.txt',
+        '都営交通全駅ファイル.txt',
+        '相模鉄道全駅ファイル.txt',
+        '相鉄全駅ファイル.txt',
+        '横浜市営地下鉄全駅ファイル.txt',
+        '湘南モノレール全駅ファイル.txt',
+        'つくばエクスプレス全駅ファイル.txt',
+        '横浜高速鉄道全駅ファイル.txt',
+        '埼玉高速鉄道全駅ファイル.txt',
+        '箱根登山鉄道全駅ファイル.txt',
+        '江ノ電全駅ファイル.txt',
+        'シーサイドライン全駅ファイル.txt',
+        '埼玉新都市交通全駅ファイル.txt',
+        'ゆりかもめ全駅ファイル.txt',
+        '多摩都市モノレール全駅ファイル.txt',
+        '千葉都市モノレール全駅ファイル.txt',
+        '山万全駅ファイル.txt',
+        'ディズニーリゾートライン全駅ファイル.txt',
+        '北総鉄道全駅ファイル.txt',
+        '芝山鉄道全駅ファイル.txt',
+        '東京モノレール全駅ファイル.txt',
+    ];
+
+    let currentSelectMode = 'company';
+    let selectedCompany = 'JR東日本';
+
+    let allStations = [];
+    let stationMap = new Map();
+    let stationIdCounter = 0;
+
+    let transferStationMap = [];
+
+    let orderMaster = {
+        companies: [],
+        routes: {},
+        routePrefixColors: {} // 会社・路線・プレフィックスごとのカラーコード辞書
+    };
+
+    let customViewState = {
+        company: null,
+        route: null
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+        updateButtonStyles();
+        loadDefaultFiles();
+    });
+
+    function selectModeAndCompany(mode, company) {
+        currentSelectMode = mode;
+        if (mode === 'company' && company) {
+            selectedCompany = company;
+        }
+        updateButtonStyles();
+    }
+
+    function updateButtonStyles() {
+        document.querySelectorAll('.btn-comp').forEach(btn => {
+            if (currentSelectMode === 'company' && btn.getAttribute('data-comp') === selectedCompany) {
+                btn.classList.add('active-company');
+            } else {
+                btn.classList.remove('active-company');
+            }
+        });
+
+        const customModeBtn = document.getElementById('btnCustomMode');
+        if (currentSelectMode === 'custom') {
+            customModeBtn.classList.add('active-custom');
+        } else {
+            customModeBtn.classList.remove('active-custom');
+        }
+    }
+
+    function showCustomView() {
+        customViewState = { company: null, route: null };
+        document.getElementById('mainView').style.display = 'none';
+        document.getElementById('customView').style.display = 'block';
+        renderCustomTree();
+    }
+
+    function showMainView() {
+        document.getElementById('customView').style.display = 'none';
+        document.getElementById('mainView').style.display = 'block';
+    }
+
+    function goBackCustomLevel() {
+        if (customViewState.route !== null) {
+            customViewState.route = null;
+        } else if (customViewState.company !== null) {
+            customViewState.company = null;
+        }
+        renderCustomTree();
+    }
+
+    function extractCompanyName(filename) {
+        let name = filename.replace(/\.[^/.]+$/, "");
+        name = name.replace(/全駅ファイル.*/, "");
+        name = name.replace(/\(.*\)/, "");
+        name = name.trim();
+
+        if (name === "京成") return "京成電鉄";
+        if (name === "京急") return "京急電鉄";
+        if (name === "西武") return "西武鉄道";
+        if (name === "東武") return "東武鉄道";
+        if (name === "京王") return "京王電鉄";
+        if (name === "東急") return "東急電鉄";
+        if (name === "小田急") return "小田急電鉄";
+        if (name === "相鉄") return "相模鉄道";
+
+        return name || "不明";
+    }
+
+    // カラーコード判定用ヘルパー（16進数5〜6桁、数字を含む英数字）
+    function isColorCodeToken(tok) {
+        return /^[0-9A-Fa-f]{5,6}$/.test(tok) && /\d/.test(tok);
+    }
+
+    // 5桁のカラーコード（F4B21など）が来た場合に6桁へ補正しつつ#を付与
+    function normalizeHexColor(hex) {
+        if (!hex) return '#888888';
+        let clean = hex.replace(/^#/, '').toUpperCase();
+        if (clean.length === 5) clean = clean + '0';
+        return '#' + clean;
+    }
+
+    function parseOrderFile(textContent) {
+        orderMaster = { companies: [], routes: {}, routePrefixColors: {} };
+        const lines = textContent.split(/\r?\n/);
+        let currentCompany = '';
+        let currentRoute = '';
+        let activeColor = null; // ナンバリングの手前に出現したカラーコードを保持
+
+        for (let line of lines) {
+            line = line.trim();
+            if (!line) continue;
+
+            if (line.startsWith('〈') && line.endsWith('〉')) {
+                currentCompany = line.replace(/[〈〉]/g, '').trim();
+                activeColor = null;
+                if (!orderMaster.companies.includes(currentCompany)) {
+                    orderMaster.companies.push(currentCompany);
+                    orderMaster.routes[currentCompany] = {};
+                    orderMaster.routePrefixColors[currentCompany] = {};
+                }
+            } else if (line.startsWith('#')) {
+                const lineContent = line.substring(1).trim();
+                // 「EB5C01JC」のようにカラーコード(5〜6桁)とナンバリング記号がくっついている場合も分離
+                const expandedContent = lineContent.replace(/([0-9A-Fa-f]{5,6})([A-Za-z]+)/g, '$1 $2');
+                const tokens = expandedContent.split(/\s+/);
+                currentRoute = tokens[0];
+                activeColor = null;
+
+                if (currentCompany) {
+                    if (!orderMaster.routes[currentCompany]) {
+                        orderMaster.routes[currentCompany] = {};
+                    }
+                    if (!orderMaster.routes[currentCompany][currentRoute]) {
+                        orderMaster.routes[currentCompany][currentRoute] = {
+                            colorCode: null,
+                            items: []
+                        };
+                    }
+                    if (!orderMaster.routePrefixColors[currentCompany][currentRoute]) {
+                        orderMaster.routePrefixColors[currentCompany][currentRoute] = {};
+                    }
+
+                    const routeObj = orderMaster.routes[currentCompany][currentRoute];
+
+                    for (let i = 1; i < tokens.length; i++) {
+                        const tok = tokens[i];
+                        if (!tok) continue;
+
+                        if (isColorCodeToken(tok)) {
+                            activeColor = normalizeHexColor(tok);
+                            routeObj.colorCode = activeColor;
+                        } else if (/^[A-Za-z]+$/.test(tok)) {
+                            const pref = tok.toUpperCase();
+                            routeObj.items.push({
+                                type: 'prefix',
+                                value: pref
+                            });
+                            // 会社・路線・プレフィックスのセットでカラーコードを紐づけ
+                            if (activeColor) {
+                                orderMaster.routePrefixColors[currentCompany][currentRoute][pref] = activeColor;
+                            }
+                        } else {
+                            routeObj.items.push({
+                                type: 'station',
+                                value: tok
+                            });
+                        }
+                    }
+
+                    // 「#成田線 JO 0074BE」のように記号の後ろにカラーコードがあった場合の後付け補完
+                    if (activeColor) {
+                        routeObj.items.forEach(item => {
+                            if (item.type === 'prefix' && !orderMaster.routePrefixColors[currentCompany][currentRoute][item.value]) {
+                                orderMaster.routePrefixColors[currentCompany][currentRoute][item.value] = activeColor;
+                            }
+                        });
+                    }
+                }
+            } else if (currentCompany && currentRoute) {
+                const routeObj = orderMaster.routes[currentCompany][currentRoute];
+                const expandedLine = line.replace(/([0-9A-Fa-f]{5,6})([A-Za-z]+)/g, '$1 $2');
+                const tokens = expandedLine.split(/\s+/);
+
+                for (let tok of tokens) {
+                    if (!tok) continue;
+
+                    if (isColorCodeToken(tok)) {
+                        // ナンバリングの手前に現れたカラーコードを更新（例: 泉岳寺 0096E0 KK）
+                        activeColor = normalizeHexColor(tok);
+                        routeObj.colorCode = activeColor;
+                    } else if (/^[A-Za-z]+$/.test(tok)) {
+                        const pref = tok.toUpperCase();
+                        routeObj.items.push({
+                            type: 'prefix',
+                            value: pref
+                        });
+                        if (activeColor) {
+                            orderMaster.routePrefixColors[currentCompany][currentRoute][pref] = activeColor;
+                        }
+                    } else {
+                        routeObj.items.push({
+                            type: 'station',
+                            value: tok
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    // 会社名・路線名一覧・ナンバリングプレフィックスの2つ（路線＋ナンバリング）でカラーコードを確定する
+    function getBadgeColorByRouteAndPrefix(companyName, routes, prefix) {
+        const compRoutesColors = orderMaster.routePrefixColors[companyName];
+        if (!compRoutesColors) return '#888888';
+
+        // 1. その駅が所属している路線の中から「路線名＋プレフィックス」が完全一致するカラーを探す
+        if (routes && routes.length > 0) {
+            for (const routeName of routes) {
+                const routeColors = compRoutesColors[routeName];
+                if (routeColors && routeColors[prefix]) {
+                    return routeColors[prefix];
+                }
+            }
+        }
+
+        // 2. 路線名表記の微差などで一致しなかった場合のみ、同会社内の他路線からフォールバック検索
+        for (const routeColors of Object.values(compRoutesColors)) {
+            if (routeColors && routeColors[prefix]) {
+                return routeColors[prefix];
+            }
+        }
+
+        return '#888888';
+    }
+
+    // 会社名と駅名から、ナンバリング順番.txtに直接記述されている路線のカラーコード一覧を取得する
+    function getStationDirectRouteBadges(companyName, stationName) {
+        const badges = [];
+        const companyRoutes = orderMaster.routes[companyName];
+        if (!companyRoutes) return badges;
+
+        for (const [routeName, routeObj] of Object.entries(companyRoutes)) {
+            const hasStation = routeObj.items.some(
+                item => item.type === 'station' && item.value === stationName
+            );
+            if (hasStation) {
+                badges.push({
+                    color: routeObj.colorCode || '#888888',
+                    text: '', // ナンバリングなし路線のためテキストは空白
+                    title: routeName
+                });
+            }
+        }
+        return badges;
+    }
+     
+    function parseTransferFile(textContent) {
+        transferStationMap = [];
+        const lines = textContent.split(/\r?\n/);
+        for (let line of lines) {
+            line = line.trim();
+            if (!line || line.startsWith('駅名')) continue;
+            
+            const parts = line.split(/[\s\t]+/);
+            if (parts.length >= 3) {
+                const rawNames = parts[0];
+                const routeCount = parseInt(parts[1], 10);
+                const companyCount = parseInt(parts[2], 10);
+                
+                let names = rawNames.split('or').map(n => n.trim()).filter(n => n);
+                
+                transferStationMap.push({
+                    names: names,
+                    totalRoutes: routeCount,
+                    totalCompanies: companyCount
+                });
+            }
+        }
+    }
+   
+    function parseTextToStations(textContent, companyName) {
+        const lines = textContent.split(/\r?\n/);
+        let currentRoutes = [];
+
+        for (let line of lines) {
+            line = line.trim();
+            if (!line) continue;
+
+            if (line.startsWith('#')) {
+                currentRoutes = line.split('#').filter(r => r.length > 0);
+            } else {
+                const parts = line.replace(/ /g, ' ').split(/\s+/);
+                let codes = [];
+                let stationName = "";
+
+                if (parts.length > 1) {
+                    codes = parts[0].split('&');
+                    stationName = parts[1];
+                } else {
+                    stationName = parts[0];
+                }
+
+                const key = `${companyName}___${stationName}`;
+                let station = stationMap.get(key);
+
+                if (!station) {
+                    station = {
+                        id: stationIdCounter++,
+                        name: stationName,
+                        company: companyName,
+                        routes: [],
+                        codes: [],
+                        numberingList: [], // CSSバッジ生成用データ [{ prefix, displayCode }]
+                        enabledRoutes: new Set()
+                    };
+                    stationMap.set(key, station);
+                    allStations.push(station);
+                }
+
+                currentRoutes.forEach(r => {
+                    if (!station.routes.includes(r)) {
+                        station.routes.push(r);
+                    }
+                    station.enabledRoutes.add(r);
+                });
+
+                codes.forEach(c => {
+                    if (!station.codes.includes(c)) {
+                        station.codes.push(c);
+                        // 「JC01」→ prefix: "JC", displayCode: "JC-01" に整形
+                        const match = c.match(/^([A-Za-z]+)(\d+)$/);
+                        const prefix = match ? match[1].toUpperCase() : c.toUpperCase();
+                        const displayCode = match ? `${match[1].toUpperCase()}-${match[2]}` : c.toUpperCase();
+                        station.numberingList.push({
+                            prefix: prefix,
+                            displayCode: displayCode
+                        });
+                    }
+                });
+            }
+        }
+    }
+
+    async function loadDefaultFiles() {
+        const statusEl = document.getElementById('statusMessage');
+        let successCount = 0;
+        let loadedCompanyNames = new Set();
+
+        allStations = [];
+        stationMap.clear();
+        stationIdCounter = 0;
+
+        for (const fileName of DEFAULT_FILES) {
+            try {
+                const response = await fetch(fileName);
+                if (!response.ok) continue;
+                const text = await response.text();
+
+                if (fileName === ORDER_FILE_NAME) {
+                    parseOrderFile(text);
+                } else if (fileName === TRANSFER_FILE_NAME) {
+                    parseTransferFile(text);
+                } else {
+                    const company = extractCompanyName(fileName);
+                    parseTextToStations(text, company);
+                    loadedCompanyNames.add(company);
+                }
+                
+                successCount++;
+            } catch (e) {
+                // スキップ
+            }
+        }
+
+        if (successCount > 0) {
+            statusEl.className = 'status-msg';
+            statusEl.textContent = `✓ ${loadedCompanyNames.size}社のデータ (${allStations.length}駅) を自動読み込みしました。`;
+            executeRandom();
+        } else {
+            statusEl.className = 'status-msg error';
+            statusEl.textContent = '※自動読み込み未完了。';
+        }
+    }
+
+    function getSortedCompanies(companyList) {
+        return [...companyList].sort((a, b) => {
+            let idxA = orderMaster.companies.indexOf(a);
+            let idxB = orderMaster.companies.indexOf(b);
+            if (idxA === -1) idxA = 9999;
+            if (idxB === -1) idxB = 9999;
+            return idxA - idxB;
+        });
+    }
+
+    function executeRandom() {
+        pickStations(currentSelectMode);
+    }
+
+    function pickStations(mode = 'company') {
+        let target = [];
+
+        if (mode === 'company') {
+            target = allStations.filter(s => s.company === selectedCompany);
+        } else if (mode === 'custom') {
+            target = allStations.filter(s => s.enabledRoutes.size > 0);
+        }
+
+        const resultsContainer = document.getElementById('resultsList');
+        resultsContainer.innerHTML = '';
+
+        if (target.length === 0) {
+            const msg = mode === 'company' 
+                ? `「${selectedCompany}」の対象駅が見つかりません。`
+                : 'カスタム設定でONになっている駅がありません。';
+            resultsContainer.innerHTML = `<div style="color:#888; padding:20px; text-align:center;">${msg}</div>`;
+            return;
+        }
+
+        let mergedTarget = [];
+        let usedStationIds = new Set();
+
+        for (let transferInfo of transferStationMap) {
+            let matchedStations = target.filter(st => {
+                return transferInfo.names.some(nameChunk => nameChunk === st.name);
+            });
+            
+            if (matchedStations.length > 0) {
+                let mergedStation = {
+                    id: "merged_" + matchedStations.map(s => s.id).join("_"),
+                    isMerged: true,
+                    originalStations: matchedStations,
+                    transferInfo: transferInfo
+                };
+                mergedTarget.push(mergedStation);
+                matchedStations.forEach(s => usedStationIds.add(s.id));
+            }
+        }
+
+        for (let st of target) {
+            if (!usedStationIds.has(st.id)) {
+                mergedTarget.push(st);
+            }
+        }
+        
+        target = mergedTarget;
+
+        const countInput = document.getElementById('pickCount');
+        let count = parseInt(countInput.value, 10);
+        if (isNaN(count) || count < 1) count = 1;
+        if (count > target.length) count = target.length;
+
+        const shuffled = [...target].sort(() => Math.random() - 0.5);
+        const picked = shuffled.slice(0, count);
+
+        function formatNameWithLimit(name, limit = 10) {
+            if (!name || name.length <= limit) return name || '';
+            let result = "";
+            for (let i = 0; i < name.length; i += limit) {
+                if (i > 0) result += "<br>";
+                result += name.substring(i, i + limit);
+            }
+            return result;
+        }
+
+        picked.forEach(st => {
+            const row = document.createElement('div');
+            row.className = 'station-row-card';
+
+            let displayNames = "";
+            let displayCompany = "";
+            let displayRoutes = "";
+            let targetBadges = []; // { color: '#EB5C01', text: 'JC-01' } の配列
+
+            if (st.isMerged) {
+                let namesSet = new Set();
+                let companiesSet = new Set();
+                let routesSet = new Set();
+                
+                st.originalStations.forEach(orig => {
+                    namesSet.add(orig.name);
+                    companiesSet.add(orig.company);
+                    orig.routes.forEach(r => routesSet.add(r));
+                    
+                    if (orig.numberingList && orig.numberingList.length > 0) {
+                        orig.numberingList.forEach(numObj => {
+                            const color = getBadgeColorByRouteAndPrefix(orig.company, orig.routes, numObj.prefix);
+                            targetBadges.push({
+                                color: color,
+                                text: numObj.displayCode,
+                                title: numObj.displayCode
+                            });
+                        });
+                    }
+                    // ナンバリングあり駅・なし駅問わず、ナンバリング順番.txtに駅名直書きされている路線の色バッジを追加
+                    const directBadges = getStationDirectRouteBadges(orig.company, orig.name);
+                    targetBadges.push(...directBadges);
+                });
+                
+                let namesArray = Array.from(namesSet).map(name => formatNameWithLimit(name, 10));
+                displayNames = namesArray.join('<br>');
+                
+                let foundCompanyCount = companiesSet.size;
+                let foundRouteCount = routesSet.size;
+                
+                let remainingCompanies = st.transferInfo.totalCompanies - foundCompanyCount;
+                let remainingRoutes = st.transferInfo.totalRoutes - foundRouteCount;
+                
+                let companiesArray = Array.from(companiesSet);
+                displayCompany = companiesArray.join('・');
+                if (remainingCompanies > 0) {
+                    displayCompany += ` <span style="font-size:0.8rem;color:#666;">(他${remainingCompanies}社)</span>`;
+                }
+                
+                let formattedRoutes = Array.from(routesSet).map(r => {
+                    return `<span style="display:inline-block; white-space:nowrap;">${r}</span>`;
+                }).join(' ');
+                
+                if (remainingRoutes > 0) {
+                    formattedRoutes += ` <span style="font-size:0.85rem;color:#555;font-weight:bold;white-space:nowrap;">＋他${remainingRoutes}路線</span>`;
+                }
+                displayRoutes = formattedRoutes;
+
+            } else {
+                displayNames = formatNameWithLimit(st.name, 10);
+                displayCompany = st.company;
+                
+                if (st.numberingList && st.numberingList.length > 0) {
+                    targetBadges = st.numberingList.map(numObj => ({
+                        color: getBadgeColorByRouteAndPrefix(st.company, st.routes, numObj.prefix),
+                        text: numObj.displayCode,
+                        title: numObj.displayCode
+                    }));
+                }
+                // ナンバリングあり駅・なし駅問わず、ナンバリング順番.txtに駅名直書きされている路線の色バッジを追加
+                const directBadges = getStationDirectRouteBadges(st.company, st.name);
+                targetBadges.push(...directBadges);
+
+                displayRoutes = st.routes.map(r => {
+                    return `<span style="display:inline-block; white-space:nowrap;">${r}</span>`;
+                }).join(' ');
+            }
+
+            // CSSナンバリングバッジのHTMLを生成（全面カラーパレット＋テキスト重ね合わせ）
+            let badgeHtml = '';
+            if (targetBadges.length > 0) {
+                badgeHtml = targetBadges.map(badge => `
+                    <div class="num-badge" title="${badge.title || ''}">
+                        <div class="num-badge-silver">
+                            <div class="num-badge-color" style="background-color: ${badge.color};">
+                                ${badge.text ? `<span class="num-badge-text">${badge.text}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                badgeHtml = '<span style="font-size:0.75rem; color:#aaa;">No Data</span>';
+            }
+
+            row.innerHTML = `
+                <div class="col-icon" data-count="${targetBadges.length}">
+                    ${badgeHtml}
+                </div>
+                <div class="col-station-name">${displayNames}</div>
+                <div class="col-info-container">
+                    <div class="col-company-box">${displayCompany}</div>
+                    <div class="col-routes-box">${displayRoutes}</div>
+                </div>
+            `;
+
+            resultsContainer.appendChild(row);
+        });
+    }
+    
+    function renderCustomTree() {
+        const container = document.getElementById('customCompanyTree');
+        const breadcrumb = document.getElementById('customBreadcrumb');
+        const backBtn = document.getElementById('customNavBackBtn');
+        const globalBtnOn = document.getElementById('globalBtnOn');
+        const globalBtnOff = document.getElementById('globalBtnOff');
+
+        if (!container) return;
+
+        const isGlobalAllOn = allStations.length > 0 && allStations.every(s => s.routes.every(r => s.enabledRoutes.has(r)));
+        const isGlobalAllOff = allStations.length > 0 && allStations.every(s => s.enabledRoutes.size === 0);
+
+        globalBtnOn.className = `btn-toggle ${isGlobalAllOn ? 'active-on' : ''}`;
+        globalBtnOff.className = `btn-toggle ${isGlobalAllOff ? 'active-off' : ''}`;
+
+        const existingCompanies = [...new Set(allStations.map(s => s.company))];
+        const companies = getSortedCompanies(existingCompanies);
+
+        if (companies.length === 0) {
+            container.innerHTML = '<div style="color:#888; padding:20px; text-align:center;">読み込まれた駅データがありません。</div>';
+            return;
+        }
+
+        let html = '';
+
+        if (customViewState.company === null) {
+            backBtn.style.display = 'none';
+            breadcrumb.textContent = '🏢 会社一覧';
+
+            companies.forEach(company => {
+                const companyStations = allStations.filter(s => s.company === company);
+                const compAllOn = companyStations.every(s => s.routes.every(r => s.enabledRoutes.has(r)));
+                const compAllOff = companyStations.every(s => s.enabledRoutes.size === 0);
+
+                const safeComp = company.replace(/'/g, "\\'");
+                html += `
+                <div class="custom-row company-row">
+                    <span class="custom-title">🏢 ${company} (${companyStations.length}駅)</span>
+                    <div class="btn-toggle-group">
+                        <button class="btn-toggle ${compAllOn ? 'active-on' : ''}" onclick="setCompanyEnabled('${safeComp}', true)">全てオン</button>
+                        <button class="btn-toggle ${compAllOff ? 'active-off' : ''}" onclick="setCompanyEnabled('${safeComp}', false)">全てオフ</button>
+                        <button class="btn-toggle ${!compAllOn && !compAllOff ? 'active-detail' : ''}" onclick="navigateToCompany('${safeComp}')">もっと細かく ＞</button>
+                    </div>
+                </div>
+                `;
+            });
+        }
+        else if (customViewState.company !== null && customViewState.route === null) {
+            backBtn.style.display = 'inline-block';
+            breadcrumb.textContent = `🏢 ${customViewState.company} ＞ 🚃 路線一覧`;
+
+            const companyStations = allStations.filter(s => s.company === customViewState.company);
+            const routesSet = new Set();
+            companyStations.forEach(s => s.routes.forEach(r => routesSet.add(r)));
+            
+            const orderedRouteList = orderMaster.routes[customViewState.company] 
+                ? Object.keys(orderMaster.routes[customViewState.company]) 
+                : [];
+
+            const routes = Array.from(routesSet).sort((a, b) => {
+                let idxA = orderedRouteList.indexOf(a);
+                let idxB = orderedRouteList.indexOf(b);
+                if (idxA === -1) idxA = 9999;
+                if (idxB === -1) idxB = 9999;
+                return idxA - idxB;
+            });
+
+            routes.forEach(route => {
+                const routeStations = companyStations.filter(s => s.routes.includes(route));
+                const routeAllOn = routeStations.every(s => s.enabledRoutes.has(route));
+                const routeAllOff = routeStations.every(s => !s.enabledRoutes.has(route));
+
+                const safeComp = customViewState.company.replace(/'/g, "\\'");
+                const safeRoute = route.replace(/'/g, "\\'");
+
+                html += `
+                <div class="custom-row route-row">
+                    <span class="custom-title">🚃 ${route} (${routeStations.length}駅)</span>
+                    <div class="btn-toggle-group">
+                        <button class="btn-toggle ${routeAllOn ? 'active-on' : ''}" onclick="setRouteEnabled('${safeComp}', '${safeRoute}', true)">全てオン</button>
+                        <button class="btn-toggle ${routeAllOff ? 'active-off' : ''}" onclick="setRouteEnabled('${safeComp}', '${safeRoute}', false)">全てオフ</button>
+                        <button class="btn-toggle ${!routeAllOn && !routeAllOff ? 'active-detail' : ''}" onclick="navigateToRoute('${safeRoute}')">もっと細かく ＞</button>
+                    </div>
+                </div>
+                `;
+            });
+        }
+        else if (customViewState.company !== null && customViewState.route !== null) {
+            backBtn.style.display = 'inline-block';
+            const currentRoute = customViewState.route;
+            const currentCompany = customViewState.company;
+            breadcrumb.textContent = `🏢 ${currentCompany} ＞ 🚃 ${currentRoute} ＞ 🚉 駅一覧`;
+
+            const routeStations = allStations.filter(s => s.company === currentCompany && s.routes.includes(currentRoute));
+
+            const routeInfo = (orderMaster.routes[currentCompany] && orderMaster.routes[currentCompany][currentRoute]) || { items: [] };
+            const routeItems = routeInfo.items || [];
+
+            function getStationRank(st) {
+                if (routeItems.length === 0) {
+                    return { bucket: 9999, subRank: st.id, matchedCode: '' };
+                }
+
+                // 1. まず「直接駅名で位置指定されているか」を優先チェック
+                // （ナンバリングを持っていても、特定の位置に駅名で配置されているケースを優先するため）
+                for (let i = 0; i < routeItems.length; i++) {
+                    const item = routeItems[i];
+                    if (item.type === 'station' && st.name === item.value) {
+                        return { bucket: i, subRank: 0, matchedCode: st.codes[0] || '' };
+                    }
+                }
+
+                // 2. 次に「ナンバリング（プレフィックス）」が定義された位置の番号を参照
+                for (let i = 0; i < routeItems.length; i++) {
+                    const item = routeItems[i];
+                    if (item.type === 'prefix') {
+                        for (let code of st.codes) {
+                            const upperCode = code.toUpperCase();
+                            // 「アルファベット部分」が完全一致し、後ろに数字が続くか判定（M と Mb の誤爆防止）
+                            const match = upperCode.match(/^([A-Z]+)(\d+)$/);
+                            if (match && match[1] === item.value) {
+                                const num = parseInt(match[2], 10);
+                                return { bucket: i, subRank: num, matchedCode: code };
+                            }
+                        }
+                    }
+                }
+
+                // 3. どちらにも該当しない駅は末尾へ
+                return { bucket: 9999, subRank: st.id, matchedCode: st.codes[0] || '' };
+            }
+
+            routeStations.sort((a, b) => {
+                const rankA = getStationRank(a);
+                const rankB = getStationRank(b);
+
+                if (rankA.bucket !== rankB.bucket) {
+                    return rankA.bucket - rankB.bucket;
+                }
+                if (rankA.subRank !== rankB.subRank) {
+                    return rankA.subRank - rankB.subRank;
+                }
+                return a.id - b.id;
+            });
+
+            routeStations.forEach(st => {
+                const isEnabled = st.enabledRoutes.has(currentRoute);
+                const rankInfo = getStationRank(st);
+                const codeDisp = rankInfo.matchedCode ? ` (${rankInfo.matchedCode})` : '';
+                const safeRoute = currentRoute.replace(/'/g, "\\'");
+
+                html += `
+                <div class="custom-row station-row">
+                    <span class="custom-title">🚉 ${st.name}${codeDisp}</span>
+                    <div class="btn-toggle-group">
+                        <button class="btn-toggle ${isEnabled ? 'active-on' : ''}" onclick="setStationRouteEnabled(${st.id}, '${safeRoute}', true)">オン</button>
+                        <button class="btn-toggle ${!isEnabled ? 'active-off' : ''}" onclick="setStationRouteEnabled(${st.id}, '${safeRoute}', false)">オフ</button>
+                    </div>
+                </div>
+                `;
+            });
+        }
+
+        container.innerHTML = html;
+    }
+
+    function navigateToCompany(company) {
+        customViewState.company = company;
+        customViewState.route = null;
+        renderCustomTree();
+    }
+
+    function navigateToRoute(route) {
+        customViewState.route = route;
+        renderCustomTree();
+    }
+
+    function setAllGlobal(enabled) {
+        allStations.forEach(s => {
+            if (enabled) {
+                s.routes.forEach(r => s.enabledRoutes.add(r));
+            } else {
+                s.enabledRoutes.clear();
+            }
+        });
+        renderCustomTree();
+    }
+
+    function setCompanyEnabled(companyName, enabled) {
+        allStations.filter(s => s.company === companyName).forEach(s => {
+            if (enabled) {
+                s.routes.forEach(r => s.enabledRoutes.add(r));
+            } else {
+                s.enabledRoutes.clear();
+            }
+        });
+        renderCustomTree();
+    }
+
+    function setRouteEnabled(companyName, routeName, enabled) {
+        allStations.filter(s => s.company === companyName && s.routes.includes(routeName)).forEach(s => {
+            if (enabled) {
+                s.enabledRoutes.add(routeName);
+            } else {
+                s.enabledRoutes.delete(routeName);
+            }
+        });
+        renderCustomTree();
+    }
+
+    function setStationRouteEnabled(stationId, routeName, enabled) {
+        const st = allStations.find(s => s.id === stationId);
+        if (st) {
+            if (enabled) {
+                st.enabledRoutes.add(routeName);
+            } else {
+                st.enabledRoutes.delete(routeName);
+            }
+        }
+        renderCustomTree();
+    }
+</script>
+</body>
+</html>
